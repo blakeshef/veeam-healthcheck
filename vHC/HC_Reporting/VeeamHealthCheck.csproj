@@ -152,7 +152,9 @@
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
 	  <Message Text="Checking if test.bat exists: $(ProjectDir)Tools\build\test.bat" Importance="High" />
-	  <LocalPostBuildBat Include="$(ProjectDir)Tools\build\test.bat" Condition="Exists('$(ProjectDir)Tools\build\test.bat')" />
+	  <ItemGroup>
+		  <LocalPostBuildBat Include="$(ProjectDir)Tools\build\test.bat" Condition="Exists('$(ProjectDir)Tools\build\test.bat')" />
+	  </ItemGroup>
 	  <Exec Command="call @(LocalPostBuildBat)" />
   </Target>
 
