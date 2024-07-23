@@ -150,9 +150,9 @@
     <Folder Include="Resources\Localization\VBR\" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="call C:\code\VeeamHub\veeam-healthcheck\vHC\HC_Reporting\Tools\build\test.bat" />
-  </Target>
+  </Target>-->
 
   <ItemGroup>
     <EditorConfigFiles Remove="C:\code\VeeamHub\veeam-healthcheck\vHC\HC_Reporting\.editorconfig" />
