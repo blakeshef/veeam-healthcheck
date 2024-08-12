@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON and JS HTML Example</title>
+    <script id="data" type="application/json">
+        {
+            "firstTable": {
+                "columns":["Proxy Name", "Cores", "RAM"],
+                "data":[
+                    {"proxyName":"firstProxy.local", "Cores":"8", "RAM":"16"},
+                    {"proxyName":"secondProxy.local", "Cores":"2", "RAM":"4"},
+                    {"proxyName":"thirdProxy.local", "Cores":"4", "RAM":"8"}
+                ]
+            },
+            "secondTable": {
+                "columns":["Registry Key", "Value"],
+                "data":[
+                    {"key":"EnableDBExclusions", "value":"1"},
+                    {"key":"KerberosExtendedLogging", "value":"1"},
+                    {"key":"HighestDetectedVMCVersion", "value":"7.0.3.0"}
+                ]
+            }
+        }
+    </script>
+    <script>
+        const data = JSON.parse(document.getElementById("data").innerText);
+        addEventListener("DOMContentLoaded", (event) => {
+            buildTable(data.firstTable, ".firstTable")
+            buildTable(data.secondTable, ".secondTable")
+        });
+
+        function buildTable(table, location) {
+            // Get the table element from the DOM
+            const tableElement = document.querySelector(location);
+
+            // Create the table header row
+            const headerRow = tableElement.insertRow();
+            table.columns.forEach(column => {
+                const th = document.createElement('th');
+                th.textContent = column;
+                headerRow.appendChild(th);
+            });
+
+            // Create the table data rows
+            table.data.forEach(rowData => {
+                const row = tableElement.insertRow();
+                for (const property in rowData) {
+                    const cell = row.insertCell();
+                    cell.textContent = rowData[property];
+                }
+            });
+        };
+    </script>
+</head>
+
+<body>
+    <H1>Here is a test:</H1>
+    <table class="firstTable">
+    </table>
+
+    <h1>Here is another test:</h1>
+    <table class="secondTable">
+    </table>
+
+</body>
+
+</html>
