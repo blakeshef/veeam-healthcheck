@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using VeeamHealthCheck.Functions.Reporting.CsvHandlers;
 using VeeamHealthCheck.Functions.Reporting.DataTypes.ProxyData;
+using VeeamHealthCheck.Functions.Reporting.Html.DataFormers;
 using VeeamHealthCheck.Shared;
 using VeeamHealthCheck.Shared.Logging;
 
@@ -29,7 +30,7 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
         public List<CJobTypeInfos> JobInfos { get { return JobInfo(); } }
         public List<CJobSessionInfo> JobSessions { get { return JobSessionInfo(); } }
         public List<CServerTypeInfos> ServerInfos { get { return ServerInfo(); } }
-        public List<CRepoTypeInfos> ExtentInfo { get { return SobrExtInfo(); } }
+        public List<CRepoTypeInfos> ExtentInfo { get { try { return SobrExtInfo(); } catch (Exception e) { throw; } } }
         public List<CProxyTypeInfos> ProxyInfos { get { return ProxyInfo(); } }
         public Dictionary<string, int> ServerSummaryInfo { get { return _serverSummaryInfo; } }
         public List<CSobrTypeInfos> SobrInfo { get { return SobrInfos(); } }
@@ -66,7 +67,7 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
         private List<CSobrTypeInfos> SobrInfos()
         {
             var sobrCsv = _csvParser.SobrCsvParser();//.ToList();
-            var capTierCsv = _csvParser.CapTierCsvParser();// ToList();
+            var capTierCsv = _csvParser.CapTierCsvParser().ToList();// ToList();
 
             List<CSobrTypeInfos> eInfoList = new List<CSobrTypeInfos>();
 
@@ -79,7 +80,7 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
 
                     if (capTierCsv != null)
                     {
-                        var c2 = capTierCsv.ToList();
+                        var c2 = capTierCsv;
                         foreach (var cap in c2)
                         {
                             if (cap.ParentId == s.Id)
@@ -87,7 +88,7 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
                                 eInfo.ImmuteEnabled = cap.Immute;
                                 eInfo.ImmutePeriod = cap.ImmutePeriod;
                                 eInfo.SizeLimitEnabled = cap.SizeLimitEnabled;
-                                if (cap.SizeLimitEnabled == "True")
+                                if (cap.SizeLimitEnabled == true)
                                     eInfo.SizeLimit = cap.SizeLimit;
 
                                 eInfo.CapTierType = cap.Type;
@@ -97,35 +98,35 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
                     }
 
                     eInfo.ArchiveExtent = s.ArchiveExtent;
-                    eInfo.ArchiveFullBackupModeEnabled = bool.Parse(s.ArchiveFullBackupModeEnabled);
+                    eInfo.ArchiveFullBackupModeEnabled = s.ArchiveFullBackupModeEnabled;
                     eInfo.ArchivePeriod = s.ArchivePeriod;
-                    eInfo.ArchiveTierEnabled = bool.Parse(s.ArchiveTierEnabled);
+                    eInfo.ArchiveTierEnabled = s.ArchiveTierEnabled;
                     eInfo.CapacityExtent = s.CapacityExtent;
                     eInfo.CapacityTierCopyPolicyEnabled = s.CapacityTierCopyPolicyEnabled;
                     eInfo.CapacityTierMovePolicyEnabled = s.CapacityTierMovePolicyEnabled;
-                    eInfo.CopyAllMachineBackupsEnabled = bool.Parse(s.CopyAllMachineBackupsEnabled);
-                    eInfo.CopyAllPluginBackupsEnabled = bool.Parse(s.CopyAllPluginBackupsEnabled);
-                    eInfo.CostOptimizedArchiveEnabled = bool.Parse(s.CostOptimizedArchiveEnabled);
+                    eInfo.CopyAllMachineBackupsEnabled = s.CopyAllMachineBackupsEnabled;
+                    eInfo.CopyAllPluginBackupsEnabled = s.CopyAllPluginBackupsEnabled;
+                    eInfo.CostOptimizedArchiveEnabled = s.CostOptimizedArchiveEnabled;
                     eInfo.Description = s.Description;
-                    eInfo.EnableCapacityTier = bool.Parse(s.EnableCapacityTier);
+                    eInfo.EnableCapacityTier = s.EnableCapacityTier;
                     if (!eInfo.EnableCapacityTier)
                     {
-                        eInfo.CapacityTierCopyPolicyEnabled = "";
-                        eInfo.CapacityTierMovePolicyEnabled = "";
+                        eInfo.CapacityTierCopyPolicyEnabled = false;
+                        eInfo.CapacityTierMovePolicyEnabled = false;
                     }
-                    eInfo.EncryptionEnabled = bool.Parse(s.EncryptionEnabled);
+                    eInfo.EncryptionEnabled = s.EncryptionEnabled;
                     eInfo.EncryptionKey = s.EncryptionKey;
                     eInfo.Extents = s.Extents;
                     eInfo.Id = s.Id;
                     eInfo.Name = s.Name;
                     eInfo.OffloadWindowOptions = s.OffloadWindowOptions;
                     eInfo.OperationalRestorePeriod = ParseToInt(s.OperationalRestorePeriod);
-                    eInfo.OverridePolicyEnabled = bool.Parse(s.OverridePolicyEnabled);
+                    eInfo.OverridePolicyEnabled = s.OverridePolicyEnabled;
                     eInfo.OverrideSpaceThreshold = ParseToInt(s.OverrideSpaceThreshold);
-                    eInfo.PerformFullWhenExtentOffline = bool.Parse(s.PerformFullWhenExtentOffline);
-                    eInfo.PluginBackupsOffloadEnabled = bool.Parse(s.PluginBackupsOffloadEnabled);
+                    eInfo.PerformFullWhenExtentOffline = (s.PerformFullWhenExtentOffline);
+                    eInfo.PluginBackupsOffloadEnabled = s.PluginBackupsOffloadEnabled;
                     eInfo.PolicyType = s.PolicyType;
-                    eInfo.UsePerVMBackupFiles = bool.Parse(s.UsePerVMBackupFiles);
+                    eInfo.UsePerVMBackupFiles = s.UsePerVMBackupFiles;
 
                     //int c = eInfo.Extents.Count();
 
@@ -173,29 +174,32 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
                     eInfo.FriendlyPath = s.FriendlyPath;
                     eInfo.FullPath = s.FullPath;
                     eInfo.Group = s.Group;
-                    eInfo.HasBackupChainLengthLimitation = ParseBool(s.HasBackupChainLengthLimitation);
+                    eInfo.HasBackupChainLengthLimitation = (s.HasBackupChainLengthLimitation);
                     eInfo.Id = s.Id;
-                    eInfo.IsDedupStorage = ParseBool(s.IsDedupStorage);
-                    eInfo.IsImmutabilitySupported = ParseBool(s.IsImmutabilitySupported);
-                    eInfo.IsRotatedDriveRepository = ParseBool(s.IsRotatedDriveRepository);
-                    eInfo.IsSanSnapshotOnly = ParseBool(s.IsSanSnapshotOnly);
-                    eInfo.IsTemporary = ParseBool(s.IsTemporary);
-                    eInfo.IsUnavailable = ParseBool(s.IsUnavailable);
+                    eInfo.IsDedupStorage = (s.IsDedupStorage);
+                    eInfo.IsImmutabilitySupported = (s.IsImmutabilitySupported);
+                    eInfo.IsRotatedDriveRepository = (s.IsRotatedDriveRepository);
+                    eInfo.IsSanSnapshotOnly = (s.IsSanSnapshotOnly);
+                    eInfo.IsTemporary = (s.IsTemporary);
+                    eInfo.IsUnavailable = (s.IsUnavailable);
                     eInfo.Name = s.Name;
                     eInfo.Path = s.Path;
-                    eInfo.SplitStoragesPerVm = ParseBool(s.SplitStoragesPerVm);
+                    eInfo.SplitStoragesPerVm = (s.SplitStoragesPerVm);
                     eInfo.Status = s.Status;
                     eInfo.Type = s.Type;
                     eInfo.TypeDisplay = s.TypeDisplay;
                     eInfo.VersionOfCreation = s.VersionOfCreation;
-                    eInfo.IsDecompress = ParseBool(s.Uncompress);
+
+                    bool.TryParse(s.Uncompress, out bool b);
+                    eInfo.IsDecompress = b;
                     eInfo.MaxTasks = ParseToInt(s.MaxTasks);
-                    eInfo.AlignBlocks = s.AlignBlock;
+                    bool.TryParse(s.AlignBlock, out bool c);
+                    eInfo.AlignBlocks = c;
                     eInfo.GateHosts = s.GateHosts;
 
                     eInfo.HostId = s.HostId;
-                    if (eInfo.HostId == "00000000-0000-0000-0000-000000000000")
-                        eInfo.IsAutoGateway = "True";
+                    if (eInfo.HostId == "00000000-0000-0000-0000-000000000000" && s.Group != "ArchiveRepository")
+                        eInfo.IsAutoGateway = true;
 
                     if (eInfo.HostId != "00000000-0000-0000-0000-000000000000")
                     {
@@ -206,6 +210,8 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
                     {
                         eInfo.Ram = MatchHostIdtoRam(eInfo.HostId);
                         eInfo.Cores = MatchHostIdToCPU(eInfo.HostId);
+
+                        // todo : If cloud, skip provisioning
                         eInfo.Povisioning = CalcRepoOptimalTasks(eInfo.MaxTasks, eInfo.Cores, eInfo.Ram);
 
                         eInfo.FreeSPace = ParseToInt(s.FreeSpace);
@@ -257,22 +263,27 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
                     //eInfo.Host = s.HostName;
                     eInfo.RepoName = s.Name;
                     eInfo.Path = s.FriendlyPath;
-                    eInfo.IsUnavailable = ParseBool(s.IsUnavailable);
+                    eInfo.IsUnavailable = (s.IsUnavailable);
                     eInfo.Type = s.TypeDisplay;
-                    eInfo.IsRotatedDriveRepository = ParseBool(s.IsRotatedDriveRepository);
-                    eInfo.IsDedupStorage = ParseBool(s.IsDedupStorage);
-                    eInfo.IsImmutabilitySupported = ParseBool(s.IsImmutabilitySupported);
+                    eInfo.IsRotatedDriveRepository = (s.IsRotatedDriveRepository);
+                    eInfo.IsDedupStorage = (s.IsDedupStorage);
+                    eInfo.IsImmutabilitySupported = (s.IsImmutabilitySupported);
                     eInfo.SobrName = s.SOBR_Name;
                     eInfo.MaxTasks = ParseToInt(s.MaxTasks);
                     eInfo.maxArchiveTasks = ParseToInt(s.MaxArchiveTaskCount);
-                    eInfo.isUnlimitedTaks = ParseBool(s.UnlimitedTasks);
+                    eInfo.isUnlimitedTaks = (s.UnlimitedTasks);
                     eInfo.dataRateLimit = ParseToInt(s.CombinedDataRateLimit);
-                    eInfo.IsDecompress = ParseBool(s.UnCompress);
-                    eInfo.SplitStoragesPerVm = ParseBool(s.OneBackupFilePerVm);
-                    eInfo.autoDetectAffinity = ParseBool(s.IsAutoDetectAffinityProxies);
+                    bool.TryParse(s.UnCompress, out bool b);
+                    eInfo.IsDecompress = b;
+                    bool.TryParse(s.OneBackupFilePerVm, out bool b2);
+                    eInfo.SplitStoragesPerVm = b2;
+
+                    bool.TryParse(s.IsAutoDetectAffinityProxies, out bool b3);
+                    eInfo.autoDetectAffinity = b3;
+
                     eInfo.HostId = s.HostId;
-                    if (eInfo.HostId == "00000000-0000-0000-0000-000000000000")
-                        eInfo.IsAutoGateway = "True";
+                    if (eInfo.HostId == "00000000-0000-0000-0000-000000000000" && s.Group != "ArchiveRepository")
+                        eInfo.IsAutoGateway = true;
 
                     if (eInfo.HostId != "00000000-0000-0000-0000-000000000000")
                     {
@@ -286,6 +297,8 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
                     eInfo.FreeSPace = ParseToInt(s.FreeSpace);
                     eInfo.TotalSpace = ParseToInt(s.TotalSpace);
                     eInfo.GateHosts = s.GateHosts;
+                    bool.TryParse(s.ObjectLockEnabled, out bool b4);
+                    eInfo.ObjectLockEnabled = b4;
 
                     eInfoList.Add(eInfo);
 
@@ -342,7 +355,7 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
 
             //var bjobCsv = _csvParser.BJobCsvParser();
             var bjobCsv = _csvParser.GetDynamicBjobs();
-            var jobCsv = _csvParser.JobCsvParser();
+            var jobCsv = _csvParser.JobCsvParser().ToList();
             List<CJobTypeInfos> eInfoList = new();
             try
             {
@@ -384,8 +397,11 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
                         jInfo.FullBackupScheduleKind = s.FullBackupScheduleKind;
                         jInfo.JobType = s.JobType;
 
-                        if (s.JobType == "DRV")
-                            jInfo.JobType = "SureBackup";
+
+
+
+                        jInfo.JobType = CJobTypesParser.GetJobType(s.JobType);
+
                         jInfo.Name = s.Name;
                         //jInfo.RepoName = MatchRepoIdToRepo(bjobCsv.Where(x => x.Name == s.Name).SingleOrDefault().RepositoryId);
                         jInfo.RestorePoints = ParseToInt(s.RestorePoints);
@@ -407,13 +423,13 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
             }
             catch (Exception e) { }
 
-            var rec = _csvParser.PluginCsvParser();
+            var rec = _csvParser.PluginCsvParser().ToList();
             if (rec != null)
                 foreach (var r in rec)
                 {
                     CJobTypeInfos j = new();
                     j.Name = r.Name;
-                    j.JobType = r.PluginType;
+                    j.JobType = CJobTypesParser.GetJobType(r.JobType);
                     j.RepoName = MatchRepoIdToRepo(r.TargetRepositoryId);
                     eInfoList.Add(j);
                 }
@@ -466,7 +482,8 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
         {
             try
             {
-                var records = _csvParser.SessionCsvParser();
+                var records = _csvParser.SessionCsvParser().ToList();
+                var jobRecords = _csvParser.JobCsvParser().ToList();
                 List<CJobSessionInfo> eInfoList = new();
                 if (records != null)
                     foreach (CJobSessionCsvInfos s in records)
@@ -486,7 +503,24 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
                         jInfo.Bottleneck = s.BottleneckDetails;
                         jInfo.CompressionRatio = s.CompressionRation;
                         jInfo.CreationTime = TryParseDateTime(s.CreationTime);
+
+                        //refactoring DataSize to use OriginalSize from Jobs CSV to match used instead of provisioned size
+                        try
+                        {
+                            var jobFromCsv = jobRecords.Where(x => x.Name == s.JobName).SingleOrDefault();
+                            if (jobFromCsv != null)
+                                jInfo.UsedVmSize = jobFromCsv.OriginalSize /1024 /1024 /1024;
+
+                        }
+                        catch (Exception e)
+                        {
+                            log.Error("Failed to parse job original size");
+
+                        }
+
                         jInfo.DataSize = ParseToDouble(s.DataSize);
+
+
                         jInfo.DedupRatio = s.DedupRatio;
                         jInfo.IsRetry = s.IsRetry;
                         jInfo.JobDuration = s.JobDuration;
@@ -549,16 +583,16 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
                     return pt.WellProvisioned;
                 if (assignedTasks > memTasks)
                     return pt.OverProvisioned;
-                if (assignedTasks < memTasks)
-                    return pt.UnderProvisioned;
+                //if (assignedTasks < memTasks)
+                //    return pt.UnderProvisioned;
             }
 
             if (coreTasks < memTasks)
             {
                 if (assignedTasks == coreTasks)
                     return pt.WellProvisioned;
-                if (assignedTasks <= coreTasks)
-                    return pt.UnderProvisioned;
+                //if (assignedTasks <= coreTasks)
+                //    return pt.UnderProvisioned;
                 if (assignedTasks > coreTasks)
                     return pt.OverProvisioned;
             }
@@ -566,8 +600,8 @@ namespace VeeamHealthCheck.Functions.Reporting.DataTypes
             {
                 if (assignedTasks == memTasks)
                     return pt.WellProvisioned;
-                if (assignedTasks <= memTasks)
-                    return pt.UnderProvisioned;
+                //if (assignedTasks <= memTasks)
+                //    return pt.UnderProvisioned;
                 if (assignedTasks > memTasks)
                     return pt.OverProvisioned;
             }

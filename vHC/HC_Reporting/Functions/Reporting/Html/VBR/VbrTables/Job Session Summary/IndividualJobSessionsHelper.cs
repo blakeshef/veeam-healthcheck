@@ -129,7 +129,7 @@ namespace VeeamHealthCheck.Functions.Reporting.Html.VBR.VbrTables.Job_Session_Su
                 int counter = 1;
 
                 //test
-                foreach(var cs in jobSessions)
+                foreach (var cs in jobSessions)
                 {
                     string info = string.Format("Parsing {0} of {1} Job Sessions to HTML", counter, totalSessions);
                     counter++;
@@ -147,7 +147,11 @@ namespace VeeamHealthCheck.Functions.Reporting.Html.VBR.VbrTables.Job_Session_Su
 
                         }
                     }
-                    catch (Exception e) { log.Error(e.Message); }
+                    catch (Exception e)
+                    {
+                        log.Error("Exception at individual job session parse:");
+                        log.Error(e.Message);
+                    }
 
                     percentCounter++;
                 }
@@ -178,15 +182,16 @@ namespace VeeamHealthCheck.Functions.Reporting.Html.VBR.VbrTables.Job_Session_Su
 
 
                 scrubString = null;
-                
 
-                   // percentCounter++;
-                
+
+                // percentCounter++;
+
             }
 
 
+            LogJobSessionParseProgress(100, 100);
 
-            
+
         }
         private string SetMainDir(string folderName, CJobSessionInfo cs)
         {
@@ -220,7 +225,7 @@ namespace VeeamHealthCheck.Functions.Reporting.Html.VBR.VbrTables.Job_Session_Su
         }
         private string ReturnTableHeaderString(CJobSessionInfo cs)
         {
-            string s = _form.FormHeader();
+            string s = _form.Header();
             s += "<h2>" + cs.JobName + "</h2>";
 
             s += "<table border=\"1\"><tr>";
@@ -247,7 +252,7 @@ namespace VeeamHealthCheck.Functions.Reporting.Html.VBR.VbrTables.Job_Session_Su
         }
         private string ReturnTableHeaderString(string jobname)
         {
-            string s = _form.FormHeader();
+            string s = _form.Header();
             s += "<h2>" + jobname + "</h2>";
 
             s += "<table border=\"1\"><tr>";
